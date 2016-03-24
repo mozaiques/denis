@@ -1,10 +1,16 @@
 from setuptools import setup, find_packages
 
 
+description = (
+    'A thin set of abstractions to perform geometrical operations on '
+    'top of the latitude/longitude coordinate system'
+)
+
+
 setup(
     name='denis',
-    version='0.0.1',
-    description='A sample Python project',
+    version='0.0.2',
+    description=description,
     url='https://github.com/mozaiques/denis',
     author='Bastien Gandouet',
     author_email='bastien@mozaiqu.es',
