@@ -1,7 +1,14 @@
 import math
 import numbers
+import os
 
 import numpy as np
+
+
+def is_zero(value, resolution=None):
+    if resolution is None:
+        resolution = float(os.environ.get('DENIS_RESOLUTION', '0.001'))
+    return abs(value) < resolution
 
 
 def to_degrees(rad):
@@ -21,8 +28,8 @@ _AVG_EARTH_RADIUS = 6371000  # In meters
 
 def improved_reverse_haversine(lat_lng):
     rat_lat = lat_lng[0] * math.pi / 180
-    rad_kx = 1 / _AVG_EARTH_RADIUS
-    rad_ky = math.acos(1 - 2 * square(math.sin(1 / _AVG_EARTH_RADIUS)) / square(math.cos(rat_lat))) / 2
+    rad_ky = 1 / _AVG_EARTH_RADIUS
+    rad_kx = math.acos(1 - 2 * square(math.sin(1 / _AVG_EARTH_RADIUS)) / square(math.cos(rat_lat))) / 2
     return to_degrees(rad_kx), to_degrees(rad_ky)
 
 
@@ -78,14 +85,14 @@ class Base(object):
 
     def _get_x_y(self, point):
         return (
-            (point.latitude - self.origin[0]) / self._kx,
-            (point.longitude - self.origin[1]) / self._ky,
+            (point.longitude - self.origin[1]) / self._kx,
+            (point.latitude - self.origin[0]) / self._ky,
         )
 
     def _get_lat_lng(self, point):
         return (
-            self.origin[0] + point._x * self._kx,
-            self.origin[1] + point._y * self._ky,
+            self.origin[0] + point._y * self._ky,
+            self.origin[1] + point._x * self._kx,
         )
 
 
@@ -103,24 +110,32 @@ class Vector(object):
         else:
             raise Exception('A vector needs some coordinates')
 
+    def get_norm(self):
+        return math.sqrt(square(self._x) + square(self._y))
+
     def get_normalized(self):
-        current_norm = math.sqrt(square(self._x) + square(self._y))
+        current_norm = self.get_norm()
         return Vector(x_y=(self._x / current_norm, self._y / current_norm))
 
     def get_direct_orthogonal(self):
         vec = Vector(x_y=(self._y, self._x))
-        # Determinant sign is the same than the sinus of the two vectors
-        if determinant(self, self) < 0:
+        # Determinant sign is the same than the sinus of the angle
+        # between the two vectors
+        if determinant(self, vec) < 0:
             return -vec
         return vec
 
     def is_colinear_to(self, other_vector):
-        return abs(determinant(self, other_vector)) < 1e-6
+        return is_zero(determinant(self, other_vector))
 
     def __mul__(self, other):
-        if not isinstance(other, numbers.Number):
-            raise NotImplementedError()
-        return Vector(x_y=(self._x * other, self._y * other))
+        if isinstance(other, numbers.Number):
+            return Vector(x_y=(self._x * other, self._y * other))
+
+        if isinstance(other, Vector):
+            return self._x * other._x + self._y * other._y
+
+        raise NotImplementedError()
 
     def __rmul__(self, other):
         return self.__mul__(other)
@@ -155,6 +170,9 @@ class Line(object):
     def is_parallel_to(self, other_line):
         return self._normed_vector.is_colinear_to(other_line._normed_vector)
 
+    def is_perpendicular_to(self, other_line):
+        return is_zero(self._normed_vector * other_line._normed_vector)
+
     def get_intersection_with(self, other_line):
         xv1, yv1 = self._normed_vector._x, self._normed_vector._y
         xv2, yv2 = other_line._normed_vector._x, other_line._normed_vector._y
@@ -165,3 +183,20 @@ class Line(object):
         vals = np.array([yv1*xp1 - xv1*yp1, yv2*xp2 - xv2*yp2])
         x_y = np.linalg.solve(eqs, vals).tolist()
         return self._point1._base.make_point(x_y=x_y)
+
+
+class Segment(object):
+
+    def __init__(self, point1, point2):
+        self.start = point1
+        self.end = point2
+
+        self._vector = Vector(points=(point1, point2))
+        self.length = self._vector.get_norm()
+
+    def divide_per(self, count):
+        vector = self._vector / count
+        return (
+            Segment(self.start + i * vector, self.start + (i+1) * vector)
+            for i in range(count)
+        )
