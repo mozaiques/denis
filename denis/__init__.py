@@ -5,6 +5,16 @@ import os
 import numpy as np
 
 
+class DoesntBelongException(Exception):
+    pass
+
+
+def _raise_if_point_doesnt_belong(point, line):
+    custom_vector = Vector(points=(point, line._point1))
+    if not line._normed_vector.is_colinear_to(custom_vector):
+        raise DoesntBelongException()
+
+
 def is_zero(value, resolution=None):
     if resolution is None:
         resolution = float(os.environ.get('DENIS_RESOLUTION', '0.001'))
@@ -118,7 +128,7 @@ class Vector(object):
         return Vector(x_y=(self._x / current_norm, self._y / current_norm))
 
     def get_direct_orthogonal(self):
-        vec = Vector(x_y=(self._y, self._x))
+        vec = Vector(x_y=(-self._y, self._x))
         # Determinant sign is the same than the sinus of the angle
         # between the two vectors
         if determinant(self, vec) < 0:
@@ -126,7 +136,7 @@ class Vector(object):
         return vec
 
     def is_colinear_to(self, other_vector):
-        return is_zero(determinant(self, other_vector))
+        return is_zero(determinant(self, other_vector), resolution=1e-6)
 
     def __mul__(self, other):
         if isinstance(other, numbers.Number):
@@ -161,17 +171,22 @@ class Line(object):
         self._normed_vector = Vector(points=(point1, point2)).get_normalized()
 
     def get_perpendicular_at(self, point):
+        _raise_if_point_doesnt_belong(point, self)
         direct_orthogonal_vector = self._normed_vector.get_direct_orthogonal()
         return Line(point, point + direct_orthogonal_vector)
 
     def get_point_at_distance(self, distance, from_point):
+        _raise_if_point_doesnt_belong(from_point, self)
         return from_point + distance * self._normed_vector
 
     def is_parallel_to(self, other_line):
         return self._normed_vector.is_colinear_to(other_line._normed_vector)
 
     def is_perpendicular_to(self, other_line):
-        return is_zero(self._normed_vector * other_line._normed_vector)
+        return is_zero(
+            self._normed_vector * other_line._normed_vector,
+            resolution=1e-6,
+        )
 
     def get_intersection_with(self, other_line):
         xv1, yv1 = self._normed_vector._x, self._normed_vector._y
