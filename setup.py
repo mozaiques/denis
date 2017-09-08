@@ -9,7 +9,7 @@ description = (
 
 setup(
     name='denis',
-    version='0.0.5',
+    version='0.0.6',
     description=description,
     url='https://github.com/mozaiques/denis',
     author='Bastien Gandouet',
@@ -19,7 +19,7 @@ setup(
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
     ],
     packages=find_packages(exclude=['tests']),
     install_requires=['numpy'],
