@@ -36,6 +36,18 @@ def determinant(vector1, vector2):
 _AVG_EARTH_RADIUS = 6371000  # In meters
 
 
+def haversine(lat_lng1, lat_lng2):
+    """Cf https://github.com/mapado/haversine"""
+    lat1, lng1 = lat_lng1
+    lat2, lng2 = lat_lng2
+    lat1, lng1, lat2, lng2 = map(math.radians, (lat1, lng1, lat2, lng2))
+    lat = lat2 - lat1
+    lng = lng2 - lng1
+    d = math.sin(lat * 0.5) ** 2 \
+        + math.cos(lat1) * math.cos(lat2) * math.sin(lng * 0.5) ** 2
+    return 2 * _AVG_EARTH_RADIUS * math.asin(math.sqrt(d))
+
+
 def improved_reverse_haversine(lat_lng):
     rat_lat = lat_lng[0] * math.pi / 180
     rad_ky = 1 / _AVG_EARTH_RADIUS
