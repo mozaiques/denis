@@ -1,5 +1,3 @@
-from haversine import haversine
-
 import denis
 
 
@@ -15,7 +13,7 @@ some_lat_lng = [
 def test_improved_reverse_haversine():
     for lat_lng in some_lat_lng:
         kx, ky = denis.improved_reverse_haversine(lat_lng)
-        dx = haversine(lat_lng, (lat_lng[0] + ky, lat_lng[1])) * 1000
-        dy = haversine(lat_lng, (lat_lng[0], lat_lng[1] + kx)) * 1000
+        dx = denis.haversine(lat_lng, (lat_lng[0] + ky, lat_lng[1]))
+        dy = denis.haversine(lat_lng, (lat_lng[0], lat_lng[1] + kx))
         assert denis.is_zero(dx - 1)
         assert denis.is_zero(dy - 1)

@@ -1,0 +1,8 @@
+[package]
+name = "rust"
+version = "0.0.7"
+authors = ["Bastien Gandouet <bastien@ouihelp.fr>"]
+
+[lib]
+name = "denis"
+crate-type = ["cdylib"]

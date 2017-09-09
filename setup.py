@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 
 description = (
@@ -9,7 +9,7 @@ description = (
 
 setup(
     name='denis',
-    version='0.0.6',
+    version='0.0.7',
     description=description,
     url='https://github.com/mozaiques/denis',
     author='Bastien Gandouet',
@@ -21,6 +21,8 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3.6',
     ],
-    packages=find_packages(exclude=['tests']),
-    install_requires=['numpy'],
+    packages=['denis'],
+    install_requires=['numpy', 'cffi>=1.10'],
+    include_package_data=True,
+    zip_safe=False,
 )

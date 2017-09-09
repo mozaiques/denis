@@ -4,6 +4,8 @@ import os
 
 import numpy as np
 
+from . import _native
+
 
 class DoesntBelongException(Exception):
     pass
@@ -17,7 +19,7 @@ def _raise_if_point_doesnt_belong(point, line):
 
 def is_zero(value, resolution=None):
     if resolution is None:
-        resolution = float(os.environ.get('DENIS_RESOLUTION', '0.001'))
+        resolution = float(os.environ.get('DENIS_RESOLUTION', '0.01'))
     return abs(value) < resolution
 
 
@@ -36,7 +38,10 @@ def determinant(vector1, vector2):
 _AVG_EARTH_RADIUS = 6371000  # In meters
 
 
-def haversine(lat_lng1, lat_lng2):
+def haversine(lat_lng1, lat_lng2, native=True):
+    if native:
+        return _native.haversine(lat_lng1, lat_lng2)
+
     """Cf https://github.com/mapado/haversine"""
     lat1, lng1 = lat_lng1
     lat2, lng2 = lat_lng2
