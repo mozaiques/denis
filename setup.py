@@ -9,7 +9,7 @@ description = (
 
 setup(
     name='denis',
-    version='0.0.7',
+    version='0.0.8',
     description=description,
     url='https://github.com/mozaiques/denis',
     author='Bastien Gandouet',
