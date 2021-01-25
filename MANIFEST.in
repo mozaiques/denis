@@ -1,1 +1,2 @@
 include denis/*.dylib
+include denis/*.so

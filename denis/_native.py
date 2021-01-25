@@ -3,12 +3,17 @@ import pkg_resources
 
 from cffi import FFI
 
+LIB_NAME = None
 
 if platform.system() == 'Linux' and platform.architecture()[0] == '64bit':
-    LIB_NAME = 'libdenis.x86_64.so'
+    LIB_NAME = 'libdenis.linux.x86_64.so'
 elif platform.system() == 'Darwin':
-    LIB_NAME = 'libdenis.macos.dylib'
-else:
+    if platform.machine() == 'arm64':
+        LIB_NAME = 'libdenis.darwin.arm64.dylib'
+    elif platform.machine() == 'x86_64':
+        LIB_NAME = 'libdenis.darwin.x86_64.dylib'
+
+if LIB_NAME is None:
     raise Exception('Unsuported system')
 
 
